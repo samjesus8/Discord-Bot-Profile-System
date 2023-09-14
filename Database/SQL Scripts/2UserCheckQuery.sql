@@ -1,0 +1,1 @@
+select exists (select 1 from data.userinfo where username = 'samjesus8' and serverid = 1127961858230452246 limit 1);
