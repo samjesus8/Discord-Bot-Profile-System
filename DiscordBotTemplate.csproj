@@ -185,6 +185,8 @@
     <Content Include="Database\SQL Scripts\2UserCheckQuery.sql" />
     <Content Include="Database\SQL Scripts\3StoreUser.sql" />
     <Content Include="Database\SQL Scripts\4RetrieveUser.sql" />
+    <Content Include="Database\SQL Scripts\5AddingXP.sql" />
+    <Content Include="Database\SQL Scripts\6LevellingUp.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" />

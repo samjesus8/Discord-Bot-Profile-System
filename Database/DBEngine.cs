@@ -8,6 +8,8 @@ namespace DiscordBotTemplate.Database
     {
         private string connectionString = "Host=ENTER-HOST-HERE;Username=ENTER-USERNAME-HERE;Password=ENTER-PASSWORD-HERE;Database=ENTER-DB-HERE";
 
+        public bool isLevelledUp = false;
+
         public async Task<bool> StoreUserAsync(DUser user)
         {
             var totalUsers = await GetTotalUsersAsync();
@@ -118,6 +120,66 @@ namespace DiscordBotTemplate.Database
             }
         }
 
+        public async Task<bool> AddXPAsync(string username, ulong serverID)
+        {
+            var XPAmounts = await DetermineXPAsync(username, serverID);
+
+            try
+            {
+                using (var conn = new NpgsqlConnection(connectionString))
+                {
+                    await conn.OpenAsync();
+
+                    string query = "UPDATE data.userinfo " +
+                                   $"SET xp = xp + {XPAmounts.Item1}, xplimit = {XPAmounts.Item2} " +
+                                   $"WHERE username = '{username}' AND serverid = {serverID}";
+
+                    using (var cmd = new NpgsqlCommand(query, conn))
+                    {
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+        }
+
+        public async Task<bool> LevelUpAsync(string username, ulong serverID)
+        {
+            isLevelledUp = false;
+            var XPAmounts = await DetermineXPAsync(username, serverID);
+
+            try
+            {
+                using (var conn = new NpgsqlConnection(connectionString))
+                {
+                    await conn.OpenAsync();
+
+                    string query = "UPDATE data.userinfo " +
+                                   $"SET level = level + 1, xp = 0, xplimit = {XPAmounts.Item2} " +
+                                   $"WHERE username = '{username}' AND serverid = {serverID}";
+
+                    using (var cmd = new NpgsqlCommand(query, conn))
+                    {
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                }
+
+                isLevelledUp = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+        }
+
         private async Task<(bool, long)> GetTotalUsersAsync()
         {
             try
@@ -140,6 +202,25 @@ namespace DiscordBotTemplate.Database
                 Console.WriteLine(ex.ToString());
                 return (false, -1);
             }
+        }
+
+        private async Task<(double, int)> DetermineXPAsync(string username, ulong serverID)
+        {
+            var user = await GetUserAsync(username, serverID);
+
+            switch(user.Item2.Level)
+            {
+                case int level when level >= 1 && level <= 5:
+                    return (10.0, 100);
+
+                case int level when level >= 6 && level <= 10:
+                    return (5.0, 200);
+
+                //You can add on more of these boundaries if you want
+            }
+
+            //Default
+            return (10.0, 100);
         }
     }
 }
