@@ -74,6 +74,8 @@ namespace DiscordBotTemplate.Commands
                         Color = DiscordColor.Red,
                         Title = "Something went wrong when trying to get your Profile"
                     };
+
+                    await ctx.Channel.SendMessageAsync(embed: errorMessage);
                 }
             }
         }
